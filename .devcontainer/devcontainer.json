@@ -1,0 +1,180 @@
+{
+  // Name of the development container displayed in VS Code
+  "name": "LectusAI",
+  // Build configuration for the container
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "USERNAME": "lectus",
+      "USER_UID": "1000",
+      "USER_GID": "1000",
+      "CACHE_BUST": "2025-07-15"
+    }
+  },
+  // disable ip6
+  "runArgs": [
+    "--sysctl", "net.ipv6.conf.all.disable_ipv6=1",
+    "--sysctl", "net.ipv6.conf.default.disable_ipv6=1",
+    "--sysctl", "net.ipv6.conf.lo.disable_ipv6=1",
+    "--cap-add=NET_ADMIN"
+  ],
+  // Run container in privileged mode to allow Docker-in-Docker functionality
+  "privileged": true,
+  // Volume mounts for persistent storage
+  // - devcontainer-home: Preserves home directory between container rebuilds
+  // - devcontainer-docker: Preserves Docker cache and images between sessions
+  "mounts": [
+    "source=devcontainer-home,target=/home/lectus,type=volume",
+    "source=devcontainer-docker,target=/var/lib/docker,type=volume"
+  ],
+  // User to run as inside the container (matches USERNAME in Dockerfile)
+  // https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
+  "containerUser": "lectus",
+  "remoteUser": "lectus",
+  "updateRemoteUserUID": false,
+  // Environment variables set in the container
+  "containerEnv": {
+    // AWS SSO Configuration
+    "AWS_DEFAULT_SSO_START_URL": "https://d-9067df9efc.awsapps.com/start",
+    "AWS_DEFAULT_SSO_REGION": "us-east-1",
+    "AWS_DEFAULT_REGION": "us-east-2",
+    // Workspace path inside container
+    "CONTAINER_WORKSPACE": "${containerWorkspaceFolder}",
+    // Enable Docker BuildKit for improved build performance
+    "DOCKER_BUILDKIT": "1",
+    // Python development
+    "PYTHONPATH": "${containerWorkspaceFolder}"
+  },
+  // VS Code specific customizations
+  "customizations": {
+    "vscode": {
+      // VS Code settings that override user settings while in this container
+      "settings": {
+        // dev container
+        "dev.containers.dockerCredentialHelper": false,
+        // aws
+        "aws.sso.startUrl": "https://my-sso-portal.awsapps.com/start",
+        "aws.sso.region": "us-east-2",
+        "aws.region": "us-east-2",
+        // editor
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        // Python
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "python.formatting.provider": "black",
+        // TypeScript and JavaScript
+        "typescript.preferences.includePackageJsonAutoImports": "auto",
+        "eslint.workingDirectories": ["frontend"],
+        // Tailwind CSS
+        "tailwindCSS.includeLanguages": {
+          "typescript": "javascript",
+          "typescriptreact": "javascript"
+        },
+        // extensions
+        "extensions.ignoreRecommendations": true,
+        // files
+        "files.autoSave": "afterDelay",
+        "files.encoding": "utf8",
+        "files.eol": "\n",
+        "files.trimTrailingWhitespace": true,
+        // git
+        "git.autofetch": true,
+        "git.confirmSync": false,
+        // github
+        "github.copilot.advanced": {
+          "authProvider": "github"
+        },
+        // terminal
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/usr/bin/bash",
+            "args": ["-li"]
+          },
+          "zsh": {
+            "path": "/usr/bin/zsh",
+            "args": ["-li"]
+          }
+        },
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.scrollback": 10000,
+        // telemetry
+        "telemetry.telemetryLevel": "off",
+        "aws.telemetry": false,
+        "redhat.telemetry.enabled": false
+      },
+      // VS Code extensions to be installed automatically when the container is created
+      "extensions": [
+        // Python Development
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.flake8",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+        // Frontend Development
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-vscode.vscode-typescript-next",
+        // Quantum Computing
+        "qiskit.qiskit-vscode",
+        // Bash scripting
+        "mads-hartmann.bash-ide-vscode",
+        // Terraform syntax highlighting, validation and formatting
+        "hashicorp.terraform",
+        // GitHub extensions
+        "GitHub.copilot", // AI code assistance
+        "GitHub.copilot-chat", // AI conversational interface
+        "github.vscode-github-actions", // GitHub Actions workflow support
+        "github.vscode-pull-request-github", // GitHub PR management
+        // Git
+        "eamodio.gitlens",
+        // Docker for container management
+        "ms-azuretools.vscode-containers",
+        // System resource monitoring extension
+        "mutantdino.resourcemonitor",
+        // lang support
+        "ms-vscode.vscode-json",
+        "ms-vscode.yaml",
+        "redhat.vscode-xml"
+      ]
+    }
+  },
+  // Port forwarding for development services
+  "forwardPorts": [3000, 8001, 8002, 5432, 6379, 8888],
+  "portsAttributes": {
+    "3000": {
+      "label": "Frontend (Next.js)",
+      "onAutoForward": "notify"
+    },
+    "8001": {
+      "label": "Learning Service",
+      "onAutoForward": "notify"
+    },
+    "8002": {
+      "label": "Simulation Service",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "6379": {
+      "label": "Redis",
+      "onAutoForward": "silent"
+    },
+    "8888": {
+      "label": "Jupyter Lab",
+      "onAutoForward": "notify"
+    }
+  },
+  // Fix volume permissions after container starts but before setup
+  // "postStartCommand": "sudo chown -R lectus:lectus || true",
+  // Run setup script after container creation
+  // "postCreateCommand": "setup-dev",
+  // lets clean docker on the host clean and clean up unused anonymous volumes
+  "initializeCommand": "docker volume prune -f"
+}
