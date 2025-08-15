@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "aws-docs": {
+      "command": "uvx",
+      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["search_aws_docs", "get_aws_service_info"]
+    },
+    "github": {
+      "command": "uvx",
+      "args": ["mark3labs.github-mcp-server@latest"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      },
+      "disabled": false,
+      "autoApprove": ["search_repositories", "get_repository_info"]
+    },
+    "web-search": {
+      "command": "uvx",
+      "args": ["exa-labs.exa-mcp-server@latest"],
+      "env": {
+        "EXA_API_KEY": ""
+      },
+      "disabled": false,
+      "autoApprove": ["search"]
+    },
+    "postgres": {
+      "command": "uvx",
+      "args": ["postgres-mcp-server@latest"],
+      "env": {
+        "DATABASE_URL": ""
+      },
+      "disabled": true,
+      "autoApprove": ["query", "schema"]
+    }
+  }
+}

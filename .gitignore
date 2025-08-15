@@ -27,6 +27,8 @@ Thumbs.db
 # Sensitive information
 config.ini
 .env
+.env.local
+.env.production
 
 # Build artifacts
 dist/
@@ -35,4 +37,31 @@ build/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
+
+# Frontend specific
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env.production
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+terraform/placeholder.zip
+
+# Docker
+*.log
+
+# AWS
+.aws/
+
+# Testing
+coverage/
+.coverage
+.pytest_cache/
+.nyc_output/
 
